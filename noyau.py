@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Fichier Noyau du projet
---------------------
+
 Programme principal bootstrap du projet
 
 Fait appel aux services de module 2 et module 3 (et module n)
