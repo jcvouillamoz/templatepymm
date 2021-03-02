@@ -95,8 +95,8 @@ def xlsx2List(nomFichierXlsx,listXlsx,paraGen):
     racineChemin = ouSuisJe()
     racineCheminSRep = racineChemin + paraGen["cheminData"] + "/"
     nomXlsxComplet = racineCheminSRep + nomFichierXlsx
-    if paraGen["imprimeOK"]:
-        print("xlsx2List : nomXlsxComplet : {}".format(nomXlsxComplet))
+    # if paraGen["imprimeOK"]:
+    #     print("xlsx2List : nomXlsxComplet : {}".format(nomXlsxComplet))
     
     # accès au fichier excel et à sa feuille active
     import openpyxl
@@ -151,8 +151,8 @@ def list2Xlsx(listXlsx,nomFichierXlsx,paraGen):
     racineChemin = ouSuisJe()
     racineCheminSRep = racineChemin + paraGen["cheminData"] + "/"
     nomXlsxComplet = racineCheminSRep + nomFichierXlsx
-    if paraGen["imprimeOK"]:
-        print("xlsx2List : nomXlsxComplet : {}".format(nomXlsxComplet))
+    # if paraGen["imprimeOK"]:
+    #     print("xlsx2List : nomXlsxComplet : {}".format(nomXlsxComplet))
         
     # accès au fichier excel et à sa feuille active
     import openpyxl
@@ -160,7 +160,8 @@ def list2Xlsx(listXlsx,nomFichierXlsx,paraGen):
     ws = wb.active
     
     # chargement de la liste dans la feuille
-    """ 
+
+    """ Evaluation nbre de lignes et de colonnes à transférer
     Partons du principe que nous traitons une liste 2D rectangulaire
     dont toutes les cellules de la ligne 0 contiennent quelque chose.
     Il en résultera que le nombre de lignes de la liste sera obtenue
@@ -168,12 +169,11 @@ def list2Xlsx(listXlsx,nomFichierXlsx,paraGen):
     sera obtenu par la fonction len(list[0])
     """
     nbreLignes = len(listXlsx)
-    print(nbreLignes)
     nbreColonnes = len(listXlsx[0])
-    print(nbreColonnes)
+
+    # boucle écriture
     for ligne in range(1,nbreLignes):
         for colonne in range(1,nbreColonnes):
-            print(ligne, colonne)
             ws.cell(row=ligne, column=colonne, value=listXlsx[ligne-1][colonne-1])
     
     # Sauvegarde de la feuille excel modifiée
