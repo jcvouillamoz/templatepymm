@@ -23,7 +23,7 @@ def ouSuisJe():
     import os
     absFilePath = os.path.abspath(__file__)
     chemin, nomScript = os.path.split(absFilePath)
-    chemin = chemin + "/"
+    chemin = chemin.replace("\\","/")
     return chemin
 
 
@@ -36,7 +36,7 @@ def chargeParametresGeneraux(nomFichierParametres):
     ----------
     nomFichierParametres : str
         Nom du fichier excel xlsx contenant la liste des paramètres selon
-        le modèle fourni avec l'appli.
+        le modèle fourni avec l'appli. Ex: params_generaux.xlsx
 
     Returns
     -------
@@ -53,7 +53,7 @@ def chargeParametresGeneraux(nomFichierParametres):
     chemin = ouSuisJe()
     # print(chemin)
     # objet workbook
-    wb = openpyxl.load_workbook(chemin + nomFichierParametres)
+    wb = openpyxl.load_workbook(chemin + "/" + nomFichierParametres)
     # objet worksheet
     ws = wb.active
     for ligne in range(1, 100):
@@ -70,3 +70,139 @@ def chargeParametresGeneraux(nomFichierParametres):
     wb.close()
     # print("JeanClaude =", JeanClaude)
     return paraGen
+
+def xlsx2List(nomFichierXlsx,listXlsx,paraGen):
+    """ Transfert du contenu de la feuille xlsx vers la liste 
+    
+    Paramètres:
+        nomFichierXlsx : str : exemple: user.xlsx
+        listXlsx : list
+        paraGen : Dictionnaire des paramètres généraux
+    
+    Le nom complet avec chemin est formé ici au moyen de la
+    fonction OuSuisJe() et du paraGen du nom du sous-pépertoire
+    relatif contenant le fichier à ouvrir.
+    
+    Le nom de liste passé en paramètre doit correspondre à une
+    liste existante, dont le contenu sera substitué par celui
+    du fichier excel, ou alors initialisé au préalable par 
+    l'appelant.
+    
+    Cette fonction retourne la liste listXlsx
+    """
+    
+    # Etablissement du nom de fichier xlsx complet
+    racineChemin = ouSuisJe()
+    racineCheminSRep = racineChemin + paraGen["cheminData"] + "/"
+    nomXlsxComplet = racineCheminSRep + nomFichierXlsx
+    if paraGen["imprimeOK"]:
+        print("xlsx2List : nomXlsxComplet : {}".format(nomXlsxComplet))
+    
+    # accès au fichier excel et à sa feuille active
+    import openpyxl
+    wb = openpyxl.load_workbook(nomXlsxComplet,data_only=True)
+    ws = wb.active
+    
+    # chargement de la feuille dans la liste
+    for i, row in enumerate(ws.rows):
+            listXlsx.append([])
+            for cell in row:
+                listXlsx[i].append(cell.value)
+    
+    # cloture accès fichier xlsx
+    wb.close()
+
+    return listXlsx    
+    
+""" # ################# code test xlsx2List #############
+# charge paraGen
+nomFichierParametres = "params_generaux.xlsx"
+paraGen = chargeParametresGeneraux(nomFichierParametres)
+nomFichierXlsx = "classeurExcel1.xlsx"
+listXlsx=[]
+listXlsx = xlsx2List(nomFichierXlsx,listXlsx,paraGen)
+if paraGen["imprimeOK"]:
+    print(listXlsx)
+""" # ###################################################    
+    
+
+def list2Xlsx(listXlsx,nomFichierXlsx,paraGen):
+    """ Transfert du contenu d'une liste xlsx vers un fichier Excel 
+    
+    Paramètres:
+        listXlsx : list
+        nomFichierXlsx : str : exemple: user.xlsx
+        paraGen : Dictionnaire des paramètres généraux
+    
+    Le nom complet avec chemin est formé ici au moyen de la
+    fonction OuSuisJe() et du paraGen du nom du sous-pépertoire
+    relatif contenant le fichier à ouvrir.
+    
+    Le nom de liste passé en paramètre doit correspondre à une
+    liste existante. Sa structure sera compatible avec celle de la
+    feuille excel destinataire. Il s'agira typiquement d'une feuille
+    excel qui a été chargée dans la liste, puis cette liste a
+    été modifiée par le script. Et on actualise ici ces changements
+    sur la feuille excel d'origine.
+    
+    Cette fonction ne retourne rien
+    """    
+    # Etablissement du nom de fichier xlsx complet
+    racineChemin = ouSuisJe()
+    racineCheminSRep = racineChemin + paraGen["cheminData"] + "/"
+    nomXlsxComplet = racineCheminSRep + nomFichierXlsx
+    if paraGen["imprimeOK"]:
+        print("xlsx2List : nomXlsxComplet : {}".format(nomXlsxComplet))
+        
+    # accès au fichier excel et à sa feuille active
+    import openpyxl
+    wb = openpyxl.load_workbook(nomXlsxComplet,data_only=True)
+    ws = wb.active
+    
+    # chargement de la liste dans la feuille
+    """ 
+    Partons du principe que nous traitons une liste 2D rectangulaire
+    dont toutes les cellules de la ligne 0 contiennent quelque chose.
+    Il en résultera que le nombre de lignes de la liste sera obtenue
+    par la fonction len(list) et que le nombre de colonnes de la liste
+    sera obtenu par la fonction len(list[0])
+    """
+    nbreLignes = len(listXlsx)
+    print(nbreLignes)
+    nbreColonnes = len(listXlsx[0])
+    print(nbreColonnes)
+    for ligne in range(1,nbreLignes):
+        for colonne in range(1,nbreColonnes):
+            print(ligne, colonne)
+            ws.cell(row=ligne, column=colonne, value=listXlsx[ligne-1][colonne-1])
+    
+    # Sauvegarde de la feuille excel modifiée
+    wb.save(nomXlsxComplet)
+    
+ 
+"""# ##### code test xlsx2List et list2Xlsx #############
+# charge paraGen
+nomFichierParametres = "params_generaux.xlsx"
+paraGen = chargeParametresGeneraux(nomFichierParametres)
+nomFichierXlsx = "essai.xlsx"
+listXlsx=[]
+# charge liste 
+listXlsx = xlsx2List(nomFichierXlsx,listXlsx,paraGen)
+if paraGen["imprimeOK"]:
+    print(listXlsx)
+    
+# modification d'un élément de la liste
+listXlsx[0][0] = "Origine"
+
+# sauve liste dans fichier Excel
+list2Xlsx(listXlsx,nomFichierXlsx,paraGen)
+"""# ###################################################  
+
+    
+    
+    
+    
+    
+    
+    
+    
